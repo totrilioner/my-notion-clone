@@ -6,7 +6,7 @@ export async function getGuestUser() {
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.email) {
-    throw new Error("Not authenticated");
+    return null;
   }
 
   const user = await prisma.user.findUnique({
@@ -17,7 +17,7 @@ export async function getGuestUser() {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    return null;
   }
 
   return user;

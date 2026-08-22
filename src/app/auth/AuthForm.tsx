@@ -68,8 +68,8 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         });
         
         if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.message || "Gagal mendaftar");
+          const data = await parseJsonSafe(res);
+          throw new Error(data.error || data.message || "Gagal mendaftar");
         }
 
         // Auto login after register
