@@ -12,6 +12,9 @@ export default function Home() {
           <span className={styles.brandName}>RayCorp</span>
         </Link>
         <div className={styles.navRight}>
+          <Link className={styles.navLink} href="/dashboard">Dashboard</Link>
+          <Link className={styles.navLink} href="/notion-clone">Notion</Link>
+          <Link className={styles.navLink} href="/owner">Owner</Link>
           <Link className={styles.navLink} href="/auth/login">Masuk</Link>
           <Link className={styles.navCta} href="/auth/register">Mulai gratis</Link>
         </div>

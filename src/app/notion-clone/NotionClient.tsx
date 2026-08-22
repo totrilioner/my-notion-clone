@@ -4,8 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { 
   ChevronRight, ChevronDown, Plus, Menu, Search, 
   Settings, Clock, Sparkles, Calendar, FileText, 
-  Folder, MoreHorizontal, MessageSquare, Sun, Moon, Home, Focus, Trash2 
+  Folder, MoreHorizontal, MessageSquare, Sun, Moon, Home, Focus, Trash2, LayoutDashboard
 } from "lucide-react";
+import Link from "next/link";
 import styles from "./notion.module.css";
 import BlockEditor from "@/components/BlockEditor";
 import { createNotionPage, updateNotionPage, deleteNotionPage } from "./actions";
@@ -138,6 +139,12 @@ export default function NotionClient({ initialPages = [] }: { initialPages: Page
 
           <div className={styles.sidebarScrollable}>
             <div className={styles.sidebarGroup}>
+              <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <SidebarItem icon={<Home size={16} />} title="RayCorp Home" />
+              </Link>
+              <Link href="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <SidebarItem icon={<LayoutDashboard size={16} />} title="Dashboard App" />
+              </Link>
               <SidebarItem icon={<Search size={16} />} title="Pencarian" />
               <SidebarItem icon={<Settings size={16} />} title="Pengaturan & anggota" />
             </div>

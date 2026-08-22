@@ -197,6 +197,13 @@ export default function DashboardShell({
                 <span className={styles.navIcon}><IconChart /></span>
                 {!collapsed && <span className={styles.navText}>Dashboard Owner</span>}
               </Link>
+              <Link
+                className={`${styles.navItem} ${pathname?.startsWith("/notion-clone") ? styles.navItemActive : ""}`}
+                href="/notion-clone"
+              >
+                <span className={styles.navIcon}><IconClipboard /></span>
+                {!collapsed && <span className={styles.navText}>Notion Workspace</span>}
+              </Link>
             </div>
 
             <div className={styles.navSection}>
