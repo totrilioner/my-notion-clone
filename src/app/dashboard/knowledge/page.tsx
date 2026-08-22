@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getGuestUser as getUser } from "@/lib/auth";
 import KnowledgeClient from "./KnowledgeClient";
@@ -11,6 +12,7 @@ const DEFAULT_CATEGORIES = [
 
 export default async function KnowledgePage() {
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const isAdmin = user.profiles.some((p: any) => p.jabatan === "Owner" || p.jabatan === "Admin");
 
   let articles: any[] = [];

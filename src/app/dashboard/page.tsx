@@ -5,6 +5,7 @@ import DashboardShell from "./DashboardShell";
 
 export default async function DashboardPage() {
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const activeProfile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
 
   const PAGE_SIZE = 20;

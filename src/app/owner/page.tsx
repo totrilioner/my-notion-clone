@@ -9,6 +9,7 @@ import styles from "./owner.module.css";
 
 export default async function OwnerPage() {
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const profile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
   
   if (profile?.jabatan !== "Owner") redirect("/dashboard");

@@ -7,6 +7,7 @@ import styles from "../sops.module.css";
 
 export default async function NewSopPage({ searchParams }: { searchParams: Promise<{ store?: string }> }) {
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const profile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
 
   if (!profile || !["Owner", "Admin Office", "Supervisor"].includes(profile.jabatan)) {

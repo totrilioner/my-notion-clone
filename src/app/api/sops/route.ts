@@ -28,8 +28,9 @@ export function OPTIONS() {
 
 export async function POST(request: Request) {
   const user = await getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const profile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
-  if (!user || !profile) return json("Anda harus login.", 401);
+  if (!profile) return json("Anda harus login.", 401);
   if (!canCreateSop(profile.jabatan as Role)) return json("Peran Anda tidak dapat membuat SOP.", 403);
   const body = await parseBody<{ judul?: string; toko?: Store; contentHtml?: string; videoUrl?: string | null }>(request);
   if (!body) return json("Payload JSON tidak valid.");
@@ -59,8 +60,9 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   const user = await getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const profile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
-  if (!user || !profile) return json("Anda harus login.", 401);
+  if (!profile) return json("Anda harus login.", 401);
   const body = await parseBody<{ id?: string; judul?: string; contentHtml?: string; videoUrl?: string | null }>(request);
   if (!body || !body.id || !body.judul?.trim() || !body.contentHtml?.trim()) return json("SOP tidak lengkap.");
   

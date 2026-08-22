@@ -8,6 +8,7 @@ import KickButton from "./KickButton";
 
 export default async function TeamsPage() {
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const activeProfile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
   const isOwner = activeProfile?.jabatan === "Owner";
 

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getGuestUser as getUser } from "@/lib/auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +14,7 @@ import styles from "../sops.module.css";
 export default async function SopDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const profile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
   
   const sop = await prisma.sop.findUnique({
