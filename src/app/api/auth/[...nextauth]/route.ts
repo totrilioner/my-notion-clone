@@ -10,26 +10,54 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "admin@example.com" },
-        password: { label: "Password", type: "password" }
+        phone: { label: "Nomor HP", type: "text" },
+        name: { label: "Nama Panggilan", type: "text" },
+        role: { label: "Jabatan", type: "text" },
+        store: { label: "Toko Pertama", type: "text" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
+        if (!credentials?.phone || !credentials?.name || !credentials?.role || !credentials?.store) {
+          throw new Error("Semua data (HP, Nama, Jabatan, Toko) wajib diisi");
         }
         
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+        // We use phone as an internal email identifier for NextAuth
+        const emailIdentifier = `${credentials.phone.replace(/[^0-9]/g, '')}@app.local`;
+
+        let user = await prisma.user.findUnique({
+          where: { email: emailIdentifier }
         });
 
-        if (!user || !user.password) {
-          throw new Error("No user found");
-        }
-
-        const isCorrectPassword = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
+        if (!user) {
+          // Register automatically
+          user = await prisma.user.create({
+            data: {
+              name: credentials.name,
+              email: emailIdentifier,
+            }
+          });
+          
+          await prisma.profile.create({
+            data: {
+              userId: user.id,
+              namaPanggilan: credentials.name,
+              telepon: credentials.phone,
+              jabatan: credentials.role,
+              toko: credentials.store,
+              izinTampilDashboard: true,
+              isActive: true,
+            }
+          });
+        } else {
+          // Update profile if they login again with different details
+          await prisma.profile.updateMany({
+            where: { userId: user.id },
+            data: {
+              namaPanggilan: credentials.name,
+              jabatan: credentials.role,
+              toko: credentials.store,
+              isActive: true,
+            }
+          });
         }
 
         return user;

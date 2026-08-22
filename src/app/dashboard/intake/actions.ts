@@ -1,4 +1,5 @@
 "use server";
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getGuestUser as getUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -15,6 +16,7 @@ export async function createComplaintCase(data: {
 }) {
   try {
     const user = await getUser();
+  if (!user) redirect('/auth/login');
 
     // Recommendation logic based on answers
     let recommendedCategory = "screen_unlock";

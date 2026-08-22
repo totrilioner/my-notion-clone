@@ -1,4 +1,5 @@
 "use server";
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getGuestUser as getUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -6,6 +7,7 @@ import { revalidatePath } from "next/cache";
 export async function createNotionPage(isPrivate: boolean = true) {
   try {
     const user = await getUser();
+  if (!user) redirect('/auth/login');
     const newPage = await prisma.notionPage.create({
       data: {
         title: "Untitled",
@@ -25,6 +27,7 @@ export async function createNotionPage(isPrivate: boolean = true) {
 export async function updateNotionPage(id: string, data: { title?: string; content?: string }) {
   try {
     const user = await getUser();
+  if (!user) redirect('/auth/login');
     // Validate ownership/access
     const page = await prisma.notionPage.findUnique({ where: { id } });
     if (!page || (page.isPrivate && page.authorId !== user.id)) {
@@ -49,6 +52,7 @@ export async function updateNotionPage(id: string, data: { title?: string; conte
 export async function deleteNotionPage(id: string) {
   try {
     const user = await getUser();
+  if (!user) redirect('/auth/login');
     const page = await prisma.notionPage.findUnique({ where: { id } });
     if (!page || (page.isPrivate && page.authorId !== user.id)) {
       throw new Error("Unauthorized");
@@ -65,6 +69,7 @@ export async function deleteNotionPage(id: string) {
 export async function getNotionPages() {
   try {
     const user = await getUser();
+  if (!user) redirect('/auth/login');
     const pages = await prisma.notionPage.findMany({
       where: {
         OR: [

@@ -1,3 +1,4 @@
+
 import { getGuestUser as getUser } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
@@ -9,6 +10,7 @@ export default async function EditSopPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   
   const user = await getUser();
+  if (!user) redirect('/auth/login');
   const profile = user.profiles.find((p: any) => p.isActive) || user.profiles[0];
 
   const sop = await prisma.sop.findUnique({
