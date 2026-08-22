@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  
+  accounts      Account[]
+  sessions      Session[]
+  profiles      Profile[]
+  sopsCreated   Sop[]     @relation("SopCreator")
+  sopsEdited    Sop[]     @relation("SopEditor")
+  comments      Comment[]
+  readingLogs   ReadingLog[]
+  chatMessages  ChatMessage[]
+  updatedSopArticles SopArticle[]
+  createdCases  ComplaintCase[] @relation("CreatedCases")
+  assignedCases ComplaintCase[] @relation("AssignedCases")
+  notionPages   NotionPage[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// App Models
+model Profile {
+  id                    String   @id @default(cuid())
+  userId                String
+  namaPanggilan         String
+  telepon               String
+  jabatan               String
+  toko                  String
+  izinTampilDashboard   Boolean  @default(false)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, toko])
+  @@map("profiles")
+}
+
+model Sop {
+  id            String   @id @default(cuid())
+  toko          String
+  judul         String
+  contentHtml   String   @default("")
+  contentClean  String   @default("")
+  videoUrl      String?
+  creatorId     String
+  lastEditorId  String
+  parentId      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  creator       User     @relation("SopCreator", fields: [creatorId], references: [id])
+  lastEditor    User     @relation("SopEditor", fields: [lastEditorId], references: [id])
+  parent        Sop?     @relation("SopChildren", fields: [parentId], references: [id])
+  children      Sop[]    @relation("SopChildren")
+  questions     QuizQuestion[]
+  comments      Comment[]
+  readingLogs   ReadingLog[]
+
+  @@index([toko, updatedAt(sort: Desc)])
+  @@map("sops")
+}
+
+model QuizQuestion {
+  id          String   @id @default(cuid())
+  sopId       String
+  pertanyaan  String
+  frasaKunci  String[]
+
+  sop Sop @relation(fields: [sopId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_questions")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  sopId     String
+  userId    String
+  konten    String
+  createdAt DateTime @default(now())
+
+  sop  Sop  @relation(fields: [sopId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sopId, createdAt])
+  @@map("comments")
+}
+
+model ReadingLog {
+  id        String    @id @default(cuid())
+  userId    String
+  sopId     String
+  mulai     DateTime  @default(now())
+  selesai   DateTime?
+  durasi    Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sop  Sop  @relation(fields: [sopId], references: [id], onDelete: Cascade)
+
+  @@index([mulai(sort: Desc)])
+  @@map("reading_logs")
+}
+
+model ChatMessage {
+  id           String   @id @default(cuid())
+  toko         String
+  userId       String
+  namaPengirim String
+  konten       String
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([toko, createdAt(sort: Desc)])
+  @@map("chat_messages")
+}
+
+model SopBlueprint {
+  id          String   @id @default(cuid())
+  sopId       String?  @unique
+  title       String
+  store       String
+  ownerRole   String? 
+  source      String   @default("manual")
+  tags        String[] @default([])
+  summary     String?
+  graphJson   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("sop_blueprints")
+}
+
+model ObsidianMap {
+  id          String   @id @default(cuid())
+  sopId       String
+  nodeId      String
+  nodeType    String   @default("topic")
+  label       String
+  parentId    String?
+  relatedTo   String[] @default([])
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([sopId, nodeId])
+  @@map("obsidian_maps")
+}
+
+model SopArticle {
+  id              String   @id @default(cuid())
+  category        String   @unique
+  title           String
+  summary         String
+  content         String
+  searchKeywords  String
+  updatedByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  updatedBy       User?    @relation(fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([category])
+  @@map("sop_articles")
+}
+
+model ComplaintCase {
+  id                  String   @id @default(cuid())
+  caseReference       String   @unique
+  customerName        String?
+  customerContact     String?
+  deviceBrand         String
+  deviceModel         String
+  deviceCondition     String
+  customerAnswers     Json
+  dataLossConsent     Boolean  @default(false)
+  recommendedCategory String
+  classification      String
+  status              String   @default("new")
+  notes               String?
+  
+  createdByUserId     String?
+  assignedToUserId    String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  createdBy           User?    @relation("CreatedCases", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  assignedTo          User?    @relation("AssignedCases", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([classification])
+  @@index([assignedToUserId])
+  @@map("complaint_cases")
+}
+
+model NotionPage {
+  id        String   @id @default(cuid())
+  title     String   @default("Untitled")
+  content   String   @default("") // Kept as string, stored as HTML or JSON
+  isPrivate Boolean  @default(true)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("notion_pages")
+}
