@@ -47,7 +47,8 @@ export async function POST(request: Request) {
         contentHtml: body.contentHtml,
         contentClean: clean,
         videoUrl: body.videoUrl && validVideoUrl(body.videoUrl) ? body.videoUrl : null,
-        creatorId: user.id
+        creatorId: user.id,
+        lastEditorId: user.id
       }
     });
     return NextResponse.json(data, { status: 201 });
@@ -75,7 +76,8 @@ export async function PUT(request: Request) {
         judul: body.judul.trim(),
         contentHtml: body.contentHtml,
         contentClean: clean,
-        videoUrl: body.videoUrl && validVideoUrl(body.videoUrl) ? body.videoUrl : null
+        videoUrl: body.videoUrl && validVideoUrl(body.videoUrl) ? body.videoUrl : null,
+        lastEditorId: user.id
       }
     });
     return NextResponse.json(data);
