@@ -40,8 +40,16 @@ export async function POST(request: Request) {
   const clean = cleanSopHtml(body.contentHtml);
   
   try {
-    // MOCK DB BYPASS
-    const data = { id: "mock-sop-" + Date.now() };
+    const data = await prisma.sop.create({
+      data: {
+        judul: title,
+        toko: store,
+        contentHtml: body.contentHtml,
+        contentClean: clean,
+        videoUrl: body.videoUrl && validVideoUrl(body.videoUrl) ? body.videoUrl : null,
+        creatorId: user.id
+      }
+    });
     return NextResponse.json(data, { status: 201 });
   } catch (error: any) {
     return json(error.message, 400);
@@ -55,14 +63,21 @@ export async function PUT(request: Request) {
   const body = await parseBody<{ id?: string; judul?: string; contentHtml?: string; videoUrl?: string | null }>(request);
   if (!body || !body.id || !body.judul?.trim() || !body.contentHtml?.trim()) return json("SOP tidak lengkap.");
   
-  // MOCK DB BYPASS
-  const existing = { toko: profile.toko };
+  const existing = await prisma.sop.findUnique({ where: { id: body.id }, select: { toko: true } });
   
   if (!existing || !canEditStore(profile.jabatan as Role, existing.toko as Store, profile.toko as Store)) return json("Anda tidak memiliki akses mengedit SOP ini.", 403);
   
   try {
-    // MOCK DB BYPASS
-    const data = { id: body.id };
+    const clean = cleanSopHtml(body.contentHtml);
+    const data = await prisma.sop.update({
+      where: { id: body.id },
+      data: {
+        judul: body.judul.trim(),
+        contentHtml: body.contentHtml,
+        contentClean: clean,
+        videoUrl: body.videoUrl && validVideoUrl(body.videoUrl) ? body.videoUrl : null
+      }
+    });
     return NextResponse.json(data);
   } catch (error: any) {
     return json(error.message);

@@ -20,15 +20,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // MOCK DB BYPASS
-    const messages: any[] = [];
+    const messages = await prisma.chatMessage.findMany({
+      where: { toko },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    });
     
     // Format to match old structure
     const formattedMessages = messages.map(m => ({
       id: m.id,
-      toko: toko,
+      toko: m.toko,
       userId: m.userId,
-      nama_pengirim: m.user?.profiles?.[0]?.namaPanggilan || "Unknown",
+      nama_pengirim: m.namaPengirim || "Unknown",
       konten: m.konten,
       createdAt: m.createdAt
     }));
@@ -61,8 +64,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // MOCK DB BYPASS
-    const data = { id: "mock-chat-" + Date.now() };
+    const profile = await prisma.profile.findFirst({ where: { userId: user.id, isActive: true } }) 
+      || await prisma.profile.findFirst({ where: { userId: user.id } });
+    const namaPengirim = profile ? profile.namaPanggilan : "Unknown";
+
+    const data = await prisma.chatMessage.create({
+      data: {
+        toko,
+        userId: user.id,
+        namaPengirim,
+        konten,
+      }
+    });
     return NextResponse.json({ id: data.id }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

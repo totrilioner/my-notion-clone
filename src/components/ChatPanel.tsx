@@ -76,9 +76,6 @@ export default function ChatPanel({
       setMessages((prev) => [...prev, tempMsg]);
       scrollToBottom();
 
-      // MOCK DB BYPASS: Karena tidak ada database, kita cukup mengandalkan optimistic update.
-      // Tidak perlu melakukan fetch ke API karena pesannya hanya tersimpan di memori lokal sementara.
-      /*
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -92,7 +89,6 @@ export default function ChatPanel({
       if (!res.ok) {
         throw new Error("Failed to send");
       }
-      */
       
     } catch (err) {
       console.error(err);
