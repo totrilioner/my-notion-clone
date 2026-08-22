@@ -17,7 +17,7 @@ type Page = {
   content: string;
   isPrivate: boolean;
   authorId: string;
-  updatedAt: string;
+  updatedAt: string | Date;
 };
 
 export default function NotionClient({ initialPages = [] }: { initialPages: Page[] }) {
