@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, phone, role, store } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
@@ -30,9 +30,9 @@ export async function POST(req: Request) {
         profiles: {
           create: {
             namaPanggilan: name,
-            jabatan: "Owner",
-            toko: "Pusat",
-            telepon: "",
+            jabatan: role || "Tim Store",
+            toko: store || "Pusat",
+            telepon: phone || "",
             isActive: true,
             izinTampilDashboard: true
           }
