@@ -1,5 +1,9 @@
 import { getNotionPages } from "./actions";
-import NotionClient from "./NotionClient";
+import dynamic from "next/dynamic";
+
+const NotionClient = dynamic(() => import("./NotionClient"), {
+  ssr: false,
+});
 
 export default async function NotionClonePage() {
   const { pages = [] } = await getNotionPages();
