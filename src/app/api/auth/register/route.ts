@@ -15,7 +15,9 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json({ message: "Email already exists" }, { status: 400 });
+      await prisma.user.delete({
+        where: { email }
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
