@@ -1,6 +1,7 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
-import dynamic from 'next/dynamic';
 
 const mermaidStr = `
 graph TD
@@ -14,25 +15,38 @@ export const MermaidBlock = ({ node, updateAttributes }: any) => {
   const [isEditing, setIsEditing] = useState(false);
   const [code, setCode] = useState(node.attrs.code || mermaidStr);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   useEffect(() => {
-    if (!isEditing && containerRef.current) {
-      import('mermaid').then((mermaid) => {
-        mermaid.default.initialize({ startOnLoad: false, theme: 'default' });
-        mermaid.default.render('mermaid-svg-' + Math.random().toString(36).substring(7), code)
-          .then((result) => {
-            if (containerRef.current) {
-              containerRef.current.innerHTML = result.svg;
-            }
-          })
-          .catch((e) => {
-             if (containerRef.current) {
-                containerRef.current.innerHTML = `<div style="color:red; padding: 10px;">Mermaid Error: ${e.message}</div>`;
-             }
-          });
-      });
-    }
-  }, [code, isEditing]);
+    if (!isMounted || isEditing || !containerRef.current) return;
+    
+    import('mermaid').then((mermaid) => {
+      mermaid.default.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+      mermaid.default.render('mermaid-svg-' + Math.random().toString(36).substring(7), code)
+        .then((result) => {
+          if (containerRef.current) {
+            containerRef.current.innerHTML = result.svg;
+          }
+        })
+        .catch((e) => {
+           if (containerRef.current) {
+              containerRef.current.innerHTML = `<div style="color:red; padding: 10px;">Mermaid Error: ${e.message}</div>`;
+           }
+        });
+    });
+  }, [code, isEditing, isMounted]);
+
+  if (!isMounted) {
+    return (
+      <NodeViewWrapper className="mermaid-block" style={{ border: '1px solid #eaeaea', borderRadius: '8px', padding: '16px', margin: '16px 0', background: '#fafafa' }}>
+        <div style={{ color: '#999', padding: '20px', textAlign: 'center' }}>Loading diagram...</div>
+      </NodeViewWrapper>
+    );
+  }
 
   return (
     <NodeViewWrapper className="mermaid-block" style={{ border: '1px solid #eaeaea', borderRadius: '8px', padding: '16px', margin: '16px 0', background: '#fafafa' }}>
