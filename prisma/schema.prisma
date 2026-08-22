@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -118,7 +118,7 @@ model QuizQuestion {
   id          String   @id @default(cuid())
   sopId       String
   pertanyaan  String
-  frasaKunci  String[]
+  frasaKunci  String
 
   sop Sop @relation(fields: [sopId], references: [id], onDelete: Cascade)
 
@@ -175,9 +175,9 @@ model SopBlueprint {
   store       String
   ownerRole   String? 
   source      String   @default("manual")
-  tags        String[] @default([])
+  tags        String   @default("[]")
   summary     String?
-  graphJson   Json?
+  graphJson   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -191,8 +191,8 @@ model ObsidianMap {
   nodeType    String   @default("topic")
   label       String
   parentId    String?
-  relatedTo   String[] @default([])
-  metadata    Json?
+  relatedTo   String   @default("[]")
+  metadata    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -225,7 +225,7 @@ model ComplaintCase {
   deviceBrand         String
   deviceModel         String
   deviceCondition     String
-  customerAnswers     Json
+  customerAnswers     String
   dataLossConsent     Boolean  @default(false)
   recommendedCategory String
   classification      String

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { ROLES, STORES } from "@/lib/constants";
 import styles from "./auth.module.css";
 
@@ -52,14 +53,55 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     setLoading(true);
 
     try {
-      // BYPASS LOGIN: Karena database dan API belum siap, kita langsung arahkan pengguna ke dashboard.
-      setTimeout(() => {
+      if (isRegister) {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            password: form.password,
+            phone: form.phone,
+            role: form.role,
+            store: form.store
+          })
+        });
+        
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "Gagal mendaftar");
+        }
+
+        // Auto login after register
+        const signInRes = await signIn("credentials", {
+          redirect: false,
+          email: form.email,
+          password: form.password,
+        });
+
+        if (signInRes?.error) {
+          throw new Error("Gagal login otomatis setelah mendaftar");
+        }
+        
         router.push("/dashboard");
         router.refresh();
-      }, 500);
+      } else {
+        const signInRes = await signIn("credentials", {
+          redirect: false,
+          email: form.email,
+          password: form.password,
+        });
+
+        if (signInRes?.error) {
+          throw new Error("Email atau sandi salah");
+        }
+
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (err) {
       console.error("AUTH ERROR:", err);
-      setError(err instanceof Error ? err.message : "singalmu bongko kang. Silakan coba lagi.");
+      setError(err instanceof Error ? err.message : "Sinyal error, silakan coba lagi.");
       setLoading(false);
     }
   }

@@ -119,7 +119,7 @@ export async function searchSops(
 ) {
   const data = await prisma.sop.findMany({
     where: {
-      ...(query ? { judul: { contains: query, mode: "insensitive" } } : {}),
+      ...(query ? { judul: { contains: query } } : {}),
       ...(filters?.store ? { toko: filters.store } : {})
     },
     select: { id: true, judul: true, toko: true, updatedAt: true },

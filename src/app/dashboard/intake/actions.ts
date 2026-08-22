@@ -33,7 +33,7 @@ export async function createComplaintCase(data: {
         deviceBrand: data.deviceBrand,
         deviceModel: data.deviceModel,
         deviceCondition: data.deviceCondition,
-        customerAnswers: data.customerAnswers,
+        customerAnswers: JSON.stringify(data.customerAnswers),
         dataLossConsent: data.dataLossConsent,
         notes: data.notes,
         recommendedCategory,

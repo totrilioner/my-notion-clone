@@ -15,8 +15,7 @@ export async function GET(request: NextRequest) {
     const sops = await prisma.sop.findMany({
       where: {
         judul: {
-          contains: query,
-          mode: "insensitive"
+          contains: query
         }
       },
       select: {

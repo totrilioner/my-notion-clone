@@ -60,8 +60,8 @@ export async function POST(request: Request) {
         nodeType: node.type || "topic",
         label: node.label || node.id,
         parentId: node.parentId || null,
-        relatedTo: node.relatedTo || [],
-        metadata: (node.metadata ?? {}) as Prisma.InputJsonObject,
+        relatedTo: JSON.stringify(node.relatedTo || []),
+        metadata: JSON.stringify(node.metadata ?? {}),
       },
       create: {
         sopId: body.sopId,
@@ -69,8 +69,8 @@ export async function POST(request: Request) {
         nodeType: node.type || "topic",
         label: node.label || node.id,
         parentId: node.parentId || null,
-        relatedTo: node.relatedTo || [],
-        metadata: (node.metadata ?? {}) as Prisma.InputJsonObject,
+        relatedTo: JSON.stringify(node.relatedTo || []),
+        metadata: JSON.stringify(node.metadata ?? {}),
       },
     });
   }
