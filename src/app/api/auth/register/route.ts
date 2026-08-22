@@ -59,6 +59,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "User created successfully", user: { id: user.id, email: user.email } }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ message: "Something went wrong", error: error.message }, { status: 500 });
+    require('fs').appendFileSync('debug.log', new Date().toISOString() + ' - Register Error: ' + error.message + '\n' + error.stack + '\n\n');
+    return NextResponse.json({ message: error.message || "Unknown error occurred" }, { status: 500 });
   }
 }
